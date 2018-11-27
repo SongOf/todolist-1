@@ -12,6 +12,7 @@ class Todos(models.Model):
     status = models.CharField(max_length=2, default='0')
     priority = models.CharField(max_length=2, default='0')
     created_at = models.DateTimeField(auto_now_add=True)
+    expired_at = models.DateTimeField(null=True)
 
     def __unicode__(self):
         return u'%d %s %s' % (self.id, self.todo, self.status)

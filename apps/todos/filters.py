@@ -1,11 +1,12 @@
 import django_filters
 
 from todos.models import Todos
+from util.constants import UNDO
 
 
 class TodosFilter(django_filters.FilterSet):
-    status = django_filters.CharFilter()
+    queryset = Todos.objects.all().filter(status=UNDO)
 
     class Meta:
         model = Todos
-        fields = ['status']
+        fields = ['-priority', 'expired_at']
