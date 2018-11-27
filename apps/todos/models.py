@@ -17,4 +17,4 @@ class Todos(models.Model):
         return u'%d %s %s' % (self.id, self.todo, self.status)
 
     class Meta:
-        ordering = ['priority', 'created_at']
+        ordering = ['-priority', 'created_at']

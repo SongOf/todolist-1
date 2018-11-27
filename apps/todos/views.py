@@ -1,63 +1,77 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+from django.http import Http404
+
 from todos.models import Todos
 from util.constants import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .serializer import Serializer
+from rest_framework.views import APIView
 
 
 # Create your views here.
-@api_view(['GET', 'POST'])
-def undo_list(request):
-    if request.method == 'GET':
-        undos = Todos.objects.filter(status=UNDO)
-        serializer = Serializer(undos, many=True)
+
+
+class TodoList(APIView):
+    """
+    List all tasks, or create a new task.
+    """
+
+    def get(self, request, format=None):
+        query_status = request.GET.get('status')
+
+        if query_status == DELETED:
+            tasks = Todos.objects.all().filter(status=DELETED)
+        elif query_status == DONE:
+            tasks = Todos.objects.all().filter(status=DONE)
+        else:
+            tasks = Todos.objects.all().filter(status=UNDO)
+        serializer = Serializer(tasks, many=True)
         return Response(serializer.data)
-    elif request.method == 'POST':
+
+    def post(self, request, format=None):
         serializer = Serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def update_undo(request, undo_id):
-    try:
-        undo = Todos.objects.get(id=undo_id)
-        if int(undo.status) == DELETED: # if undo is delete, raise DoseNotExist
-            raise Todos.DoesNotExist
-    except Todos.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class TodoDetail(APIView):
+    """
+    Retrive, update or delete a task.
+    """
 
-    if request.method == 'GET':
-        serializer = Serializer(undo)
-        return Response(serializer.data)
+    def get_object(self, task_id):
+        try:
+            task = Todos.objects.get(id=task_id)
+            if task.status == DELETED:
+                raise Http404
+            else:
+                return task
+        except Todos.DoesNotExist:
+            raise Http404
 
-    if request.method == 'PUT': # update undo text or done , here should check either status changed or not.
-        serializer = Serializer(undo, data=request.data)
+    def get(self, request, task_id, format=None):
+        task = self.get_object(task_id)
+        return Response(Serializer(task).data)
+
+    def put(self, request, task_id, format=None):
+        if 'status' in request.data and request.data['status'] == DELETED:  # only allow DELETE by HTTP method.
+            return Response(status.HTTP_403_FORBIDDEN)
+
+        task = self.get_object(task_id)
+        serializer = Serializer(task, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        undo.status = DELETED # fake delete
-        undo.save()
+    def delete(self, request, task_id, format=None):
+        task = self.get_object(task_id)
+        task.status = DELETED
+        task.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-@api_view(['GET'])
-def done_list(request):
-    if request.method == 'GET':
-        dones = Todos.objects.filter(status=DONE)
-        serializer = Serializer(dones, many=True)
-        return Response(serializer.data)
-    return Response(status=status.HTTP_400_BAD_REQUEST)
-
-# @api_view(['GET', 'POST'])
-# def expiredViewSet(request):
-#     queryset = Todos.objects.filter(status=TODOS)
-#     serializers_class = Serializer
