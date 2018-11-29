@@ -15,7 +15,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         onClickAdd: (newTask) => {
             const action = {
-                type: `${namespace}/addNewTask`,
+                type: `${namespace}/postNewTask`,
                 payload: newTask,
             };
             dispatch(action);
@@ -29,7 +29,7 @@ const mapDispatchToProps = (dispatch) => {
         },
         onClickUpdate: (task) => {
             const action = {
-                type: `${namespace}/updateTask`,
+                type: `${namespace}/putTask`,
                 payload: task,
             };
             dispatch(action);
@@ -178,7 +178,6 @@ export default class EditableTable extends Component {
                 this.props.todoList.length >= 1
                     ? (
                         <Popconfirm title="Sure to delete?" onConfirm={() => {
-                            record.status = 2 // delete
                             this.props.onClickDelete(record)
                         }}>
                             <a href="javascript:;">Delete</a>
@@ -216,8 +215,9 @@ export default class EditableTable extends Component {
             <div>
                 <Button onClick={() => {
                     const newTask = {
-                        todo: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+                        todo: 'Lali pei qi',
                         priority: '2',
+                        status: '0',
                     };
                     this.props.onClickAdd(newTask)
                 }} type="primary" style={{marginBottom: 16}}>

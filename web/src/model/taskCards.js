@@ -1,4 +1,4 @@
-import request from '../util/request';
+import {request, post, update} from '../util/request';
 
 const delay = (millisecond) => {
     return new Promise((resolve => {
@@ -13,11 +13,23 @@ export default {
         counter: 30,
     },
     effects: {
-        *queryInitTodoList(_, sagaEffects) {
+        * queryInitTodoList(_, sagaEffects) {
             const {call, put} = sagaEffects;
-            const endPointURI = 'http://localhost:8080/api/undos';
+            const endPointURI = 'http://localhost:8080/api/undos/';
             const tasks = yield call(request, endPointURI);
             yield put({type: 'initTodoList', payload: tasks});
+        },
+        * postNewTask({payload}, sagaEffects) {
+            const {call, put} = sagaEffects;
+            const endPointURI = 'http://localhost:8080/api/undos/';
+            const response = yield call(post, endPointURI, payload);
+            yield put({type: 'addNewTask', payload: response})
+        },
+        * putTask({payload}, sagaEffects) {
+            const {call, put} = sagaEffects;
+            const endPointURI = 'http://localhost:8080/api/undos/' + payload.id;
+            const response = yield call(update, endPointURI, payload);
+            yield put({type: 'updateTask', payload: response})
         }
     },
     reducers: {
@@ -30,12 +42,11 @@ export default {
             };
         },
         addNewTask(state, {payload: newTask}) {
-            const nextCounter = state.counter + 1;
-            const newTaskWithId = {...newTask, id: nextCounter};
-            const nextData = state.data.concat(newTaskWithId);
+            const nextData = state.data.concat(newTask);
+            state.counter = state.counter + 1
             return {
                 data: nextData,
-                counter: nextCounter
+                counter: state.counter
             };
         },
         deleteTask(state, {payload: newTask}) {
@@ -44,8 +55,8 @@ export default {
             newData.splice(index, 1);
             state.data = newData;
             return {
-              data: state.data,
-              counter: state.counter
+                data: state.data,
+                counter: state.counter
             };
         },
         updateTask(state, {payload: row}) {
