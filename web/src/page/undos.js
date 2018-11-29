@@ -33,7 +33,12 @@ const mapDispatchToProps = (dispatch) => {
                 payload: task,
             };
             dispatch(action);
-        }
+        },
+        onDidMount: () => {
+            dispatch({
+                type: `${namespace}/queryInitTodoList`,
+            });
+        },
     };
 };
 
@@ -145,6 +150,10 @@ class EditableCell extends Component {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class EditableTable extends Component {
+    componentDidMount() {
+        this.props.onDidMount();
+    }
+
     columns = [{
         title: 'Content',
         dataIndex: 'todo',

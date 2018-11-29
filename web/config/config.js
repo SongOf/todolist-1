@@ -14,4 +14,10 @@ export default {
             {path: 'dones', component: './dones'}
         ]
     }],
+    /*proxy: {
+        '/api': {
+            target: 'http://localhost:8080',
+            changeOrigin: true,
+        },
+    },*/
 };
