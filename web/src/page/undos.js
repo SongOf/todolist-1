@@ -34,6 +34,13 @@ const mapDispatchToProps = (dispatch) => {
             };
             dispatch(action);
         },
+        onClickDone: (task) => {
+            task.status = '1';
+            dispatch({
+                type: `${namespace}/putTask`,
+                payload: task,
+            });
+        },
         onDidMount: () => {
             dispatch({
                 type: `${namespace}/queryInitTodoList`,
@@ -171,17 +178,25 @@ export default class EditableTable extends Component {
         editable: true,
         sorter: (a, b) => a.priority - b.priority
     }, {
-        title: 'operation',
+        title: 'Operation',
         dataIndex: 'operation',
         render: (text, record) => {
             return (
                 this.props.todoList.length >= 1
                     ? (
-                        <Popconfirm title="Sure to delete?" onConfirm={() => {
-                            this.props.onClickDelete(record)
-                        }}>
-                            <a href="javascript:;">Delete</a>
-                        </Popconfirm>
+                        <div>
+                            <Popconfirm title="1 item finished?" onConfirm={() => {
+                                this.props.onClickDone(record)
+                            }}>
+                                <a href="javascript:;">Done</a>
+                            </Popconfirm>
+                            &nbsp;&nbsp;
+                            <Popconfirm title="Sure to delete?" onConfirm={() => {
+                                this.props.onClickDelete(record)
+                            }}>
+                                <a href="javascript:;">Delete</a>
+                            </Popconfirm>
+                        </div>
                     ) : null
             );
         },
@@ -215,7 +230,7 @@ export default class EditableTable extends Component {
             <div>
                 <Button onClick={() => {
                     const newTask = {
-                        todo: 'Lali pei qi',
+                        todo: 'I Love you',
                         priority: '2',
                         status: '0',
                     };

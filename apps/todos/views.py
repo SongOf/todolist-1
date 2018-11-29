@@ -17,7 +17,7 @@ class TodoList(generics.ListCreateAPIView):
     """
     queryset = Todos.objects.all().filter(status=UNDO)
     serializer_class = Serializer
-    pagination_class = StandardPagination
+    # pagination_class = StandardPagination
 
 
 class DetailGenericAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -37,7 +37,7 @@ class TodoDetail(DetailGenericAPIView):
 class DoneList(generics.ListAPIView):
     queryset = Todos.objects.all().filter(status=DONE)
     serializer_class = Serializer
-    pagination_class = StandardPagination
+    # pagination_class = StandardPagination
 
 
 class DoneDetail(DetailGenericAPIView):

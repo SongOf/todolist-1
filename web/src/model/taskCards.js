@@ -10,7 +10,6 @@ export default {
     namespace: 'taskCards',
     state: {
         data: [],
-        counter: 30,
     },
     effects: {
         * queryInitTodoList(_, sagaEffects) {
@@ -34,19 +33,15 @@ export default {
     },
     reducers: {
         initTodoList(state, {payload: tasks}) {
-            state.counter = tasks.count;
-            state.data = tasks.results;
+            state.data = tasks;
             return {
                 data: state.data,
-                counter: state.counter,
             };
         },
         addNewTask(state, {payload: newTask}) {
             const nextData = state.data.concat(newTask);
-            state.counter = state.counter + 1
             return {
                 data: nextData,
-                counter: state.counter
             };
         },
         deleteTask(state, {payload: newTask}) {
@@ -56,7 +51,6 @@ export default {
             state.data = newData;
             return {
                 data: state.data,
-                counter: state.counter
             };
         },
         updateTask(state, {payload: row}) {
@@ -70,7 +64,6 @@ export default {
             state.data = newData;
             return {
                 data: state.data,
-                counter: state.counter
             }
         }
     },
