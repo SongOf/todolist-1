@@ -28,10 +28,17 @@ export default class BasicLayout extends Component {
                                 <span>Dones</span>
                             </Link>
                         </Menu.Item>
+                        <Menu.Item key="3">
+                            <Link to={"/expired"}>
+                                <Icon type="redo"/>
+                                <span>Expired</span>
+                            </Link>
+
+                        </Menu.Item>
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{background: '#fff', textAlign: 'center', padding: 0}}>Header</Header>
+                    <Header style={{background: '#fff', textAlign: 'center', padding: 0}}>Not TODO is more important than TODO</Header>
                     <Content style={{margin: '24px 16px 0'}}>
                         <div style={{padding: 24, background: '#fff', minHeight: 360}}>
                             {this.props.children}

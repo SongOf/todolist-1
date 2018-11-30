@@ -1,5 +1,5 @@
 import {request, post, update} from '../util/request';
-import {DELETE, UPDATE, DONE} from "../util/constant";
+import {DELETE, UPDATE, DONE, EXPIRED} from "../util/constant";
 import {message} from 'antd';
 
 const delay = (millisecond) => {
@@ -14,11 +14,11 @@ export default {
         data: [],
     },
     effects: {
-        * queryInitTodoList(_, sagaEffects) {
+        * queryList({payload}, sagaEffects) {
             const {call, put} = sagaEffects;
-            const endPointURI = 'http://localhost:8080/api/undos/';
+            const endPointURI = 'http://localhost:8080/api/' + payload.URI;
             const tasks = yield call(request, endPointURI);
-            yield put({type: 'initTodoList', payload: tasks});
+            yield put({type: 'initList', payload: tasks});
         },
         * postNewTask({payload}, sagaEffects) {
             const {call, put} = sagaEffects;
@@ -46,7 +46,7 @@ export default {
         }
     },
     reducers: {
-        initTodoList(state, {payload: tasks}) {
+        initList(state, {payload: tasks}) {
             state.data = tasks;
             return {
                 data: state.data,

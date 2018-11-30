@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Table, Input, DatePicker, Dropdown, Menu, Button, Popconfirm, Form, Icon, message} from 'antd';
 import {connect} from 'dva';
-import {DELETE, DONE, UPDATE} from "../util/constant";
+import {DELETE, DONE, EXPIRED, UPDATE} from "../util/constant";
 
 const InputGroup = Input.Group;
 
@@ -27,13 +27,14 @@ const mapDispatchToProps = (dispatch) => {
             task.status = operation;
             const action = {
                 type: `${namespace}/putTask`,
-                payload: {task:task, operate:operation},
+                payload: {task: task, operate: operation},
             };
             dispatch(action);
         },
         onDidMount: () => {
             dispatch({
-                type: `${namespace}/queryInitTodoList`,
+                type: `${namespace}/queryList`,
+                payload: {URI: 'undos/'}
             });
         },
     };
@@ -248,6 +249,7 @@ export default class EditableTable extends Component {
                 <div style={{float: "left", border: "1px", width: "100%"}}>
                     <div style={{float: "left", border: "1px", width: "15%"}}>
                         <Button onClick={() => {
+                            if(this.inputMessge.expired_at === '') message.error("Please select a time.");
                             const newTask = {
                                 todo: this.inputMessge.todo,
                                 priority: this.inputMessge.priority,
@@ -256,7 +258,7 @@ export default class EditableTable extends Component {
                             };
                             this.props.onClickAdd(newTask)
                         }} type="primary" style={{marginBottom: 16}}>
-                            Add a row
+                            Add a Task
                         </Button>
                     </div>
                     <div style={{float: "left", border: "1px", width: "80%"}}>

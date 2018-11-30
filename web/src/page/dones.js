@@ -1,58 +1,57 @@
-import React, {Component} from 'react';
-import {Input, DatePicker, Dropdown, Icon, Menu, message} from 'antd';
+import {Table} from 'antd';
+import {Component} from "react";
+import {connect} from 'dva';
 
-const InputGroup = Input.Group;
+export const columns = [{
+    title: 'Content',
+    dataIndex: 'todo',
+    sorter: (a, b) => a.todo.length - b.todo.length,
+}, {
+    title: 'Priority',
+    dataIndex: 'priority',
+    // defaultSortOrder: 'descend',
+    sorter: (a, b) => a.priority - b.priority,
+}, {
+    title: 'Created Time',
+    dataIndex: 'created_at',
+    sorter: (a, b) => a.created_at - b.created_at,
+},
+    {
+        title: 'Expired Time',
+        dataIndex: 'expired_at',
+        sorter: (a, b) => a.expired_at - b.expired_at,
+    },
+];
 
-export default class TaskInput extends Component {
+const namespace = 'taskCards';
 
-    constructor(props) {
-        super(props)
-        this.state = {
-            inputMsg: '',
-            value: '',
-        }
+
+const mapStateToProps = (state) => {
+    const doneList = state[namespace].data;
+    return {
+        doneList,
+    };
+};
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        onDidMount: () => {
+            dispatch({
+                type: `${namespace}/queryList`,
+                payload: {URI:'dones/'}
+            });
+        },
+    };
+};
+
+@connect(mapStateToProps, mapDispatchToProps)
+export default class DoneList extends Component {
+    componentDidMount() {
+        this.props.onDidMount();
     }
-
-    onChangeMsg = (e) => (
-        this.setState({inputMsg: e.target.value})
-    );
-
-    onChangePriority = (value) => (
-        this.setState({value})
-    );
-
-    handleMenuClick = (e) => {
-        message.info('Click on menu item.');
-        console.log('click', e);
-    }
-
-    ratePriority = (
-        <Menu onClick={this.handleMenuClick}>
-            <Menu.Item key="1"><Icon type="flag"/>priority 1</Menu.Item>
-            <Menu.Item key="2"><Icon type="flag"/>priority 2</Menu.Item>
-            <Menu.Item key="3"><Icon type="flag"/>priotity 3</Menu.Item>
-        </Menu>
-    );
 
     render() {
-        return (
-            <div>
-                <div>
-                    <InputGroup compact>
-                        <Input style={{width: '50%'}} onChange={this.onChangeMsg} onPressEnter={() => {
-                            message.info(this.state.inputMsg)
-                        }} placeholder="add something ~(≧▽≦)/~"/>
-                        <DatePicker onChange={date => {
-                            console.log(date)
-                        }} placeholder={"Schedule"}/>
-                        <Dropdown.Button onClick={(e) => {
-                            console.log(e)
-                        }} overlay={this.ratePriority}>
-                            priority
-                        </Dropdown.Button>
-                    </InputGroup>
-                </div>
-            </div>
-        );
+        const data = this.props.doneList;
+        return <Table columns={columns} dataSource={data}/>;
     }
 }

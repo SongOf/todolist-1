@@ -11,7 +11,8 @@ export default {
         component: '../layout',
         routes: [
             {path: 'undos', component: './undos'},
-            {path: 'dones', component: './dones'}
+            {path: 'dones', component: './dones'},
+            {path: 'expired', component: './expired'}
         ]
     }],
     /*proxy: {
