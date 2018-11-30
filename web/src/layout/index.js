@@ -3,6 +3,7 @@
 import {Component} from 'react';
 import {Layout, Menu, Icon} from 'antd';
 import Link from 'umi/link';
+import styles from '../css/style.css'
 
 const {Header, Footer, Sider, Content} = Layout;
 
@@ -38,7 +39,11 @@ export default class BasicLayout extends Component {
                     </Menu>
                 </Sider>
                 <Layout>
-                    <Header style={{background: '#fff', textAlign: 'center', padding: 0}}>Not TODO is more important than TODO</Header>
+                    <Header style={{background: '#fff', textAlign: 'center', padding: 0}}>
+                        <span
+                        className={styles.Description}>Not TODO is more important than TODO
+                        </span>
+                    </Header>
                     <Content style={{margin: '24px 16px 0'}}>
                         <div style={{padding: 24, background: '#fff', minHeight: 360}}>
                             {this.props.children}
