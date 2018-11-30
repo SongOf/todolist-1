@@ -1,13 +1,14 @@
 // import fetch from 'dva/fetch';
+import {message} from 'antd';
 
 function checkStatus(response) {
-  if (response.status >= 200 && response.status < 300) {
-    return response;
-  }
-
-  const error = new Error(response.statusText);
-  error.response = response;
-  throw error;
+    if (response.status >= 200 && response.status < 300) {
+        return response;
+    }
+    const error = new Error(response.statusText);
+    error.response = response;
+    message.error(error.message);
+    throw error;
 }
 
 /**
@@ -18,9 +19,9 @@ function checkStatus(response) {
  * @return {object}           An object containing either "data" or "err"
  */
 export async function request(url, options) {
-  const response = await fetch(url, options);
-  checkStatus(response);
-  return await response.json();
+    const response = await fetch(url, options);
+    checkStatus(response);
+    return await response.json();
 }
 
 export async function post(url, payload, options) {

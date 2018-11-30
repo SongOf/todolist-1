@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
-import {Table, Input, Button, Popconfirm, Form} from 'antd';
+import {Table, Input, DatePicker, Dropdown, Menu, Button, Popconfirm, Form, Icon, message} from 'antd';
 import {connect} from 'dva';
+import {DELETE, DONE, UPDATE} from "../util/constant";
+
+const InputGroup = Input.Group;
 
 const namespace = 'taskCards';
 
@@ -20,26 +23,13 @@ const mapDispatchToProps = (dispatch) => {
             };
             dispatch(action);
         },
-        onClickDelete: (task) => {
-            const action = {
-                type: `${namespace}/deleteTask`,
-                payload: task,
-            };
-            dispatch(action);
-        },
-        onClickUpdate: (task) => {
+        onClickUpdate: (task, operation) => {
+            task.status = operation;
             const action = {
                 type: `${namespace}/putTask`,
-                payload: task,
+                payload: {task:task, operate:operation},
             };
             dispatch(action);
-        },
-        onClickDone: (task) => {
-            task.status = '1';
-            dispatch({
-                type: `${namespace}/putTask`,
-                payload: task,
-            });
         },
         onDidMount: () => {
             dispatch({
@@ -157,6 +147,14 @@ class EditableCell extends Component {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class EditableTable extends Component {
+
+    inputMessge = {
+        todo: '',
+        priority: '0',
+        expired_at: '',
+        status: '0',
+    };
+
     componentDidMount() {
         this.props.onDidMount();
     }
@@ -185,14 +183,15 @@ export default class EditableTable extends Component {
                 this.props.todoList.length >= 1
                     ? (
                         <div>
-                            <Popconfirm title="1 item finished?" onConfirm={() => {
-                                this.props.onClickDone(record)
-                            }}>
+                            <Popconfirm title="1 item finished?" icon={<Icon type="check-circle" style={{color: 'green'}}/>}
+                                        onConfirm={() => {
+                                            this.props.onClickUpdate(record, DONE)
+                                        }}>
                                 <a href="javascript:;">Done</a>
                             </Popconfirm>
                             &nbsp;&nbsp;
-                            <Popconfirm title="Sure to delete?" onConfirm={() => {
-                                this.props.onClickDelete(record)
+                            <Popconfirm title="Sure to delete?" placement="right" onConfirm={() => {
+                                this.props.onClickUpdate(record, DELETE)
                             }}>
                                 <a href="javascript:;">Delete</a>
                             </Popconfirm>
@@ -221,29 +220,72 @@ export default class EditableTable extends Component {
                     dataIndex: col.dataIndex,
                     title: col.title,
                     handleSave: (row) => {
-                        this.props.onClickUpdate(row);
+                        this.props.onClickUpdate(row, UPDATE);
                     },
                 }),
             };
         });
+
+        const onChangeMsg = (e) => (
+            this.inputMessge.todo = e.target.value
+        );
+
+        const handleMenuClick = (e) => {
+            message.info('Priority ' + e.key);
+            this.inputMessge.priority = e.key;
+        };
+
+        const ratePriority = (
+            <Menu onClick={handleMenuClick}>
+                <Menu.Item key="1"><Icon type="flag"/>priority 1</Menu.Item>
+                <Menu.Item key="2"><Icon type="flag"/>priority 2</Menu.Item>
+                <Menu.Item key="3"><Icon type="flag"/>priority 3</Menu.Item>
+                <Menu.Item key="4"><Icon type="flag"/>priority 4</Menu.Item>
+            </Menu>
+        );
         return (
             <div>
-                <Button onClick={() => {
-                    const newTask = {
-                        todo: 'I Love you',
-                        priority: '2',
-                        status: '0',
-                    };
-                    this.props.onClickAdd(newTask)
-                }} type="primary" style={{marginBottom: 16}}>
-                    Add a row
-                </Button>
-                <Table
-                    components={components}
-                    rowClassName={() => 'editable-row'}
-                    bordered
-                    dataSource={this.props.todoList}
-                    columns={columns}
+                <div style={{float: "left", border: "1px", width: "100%"}}>
+                    <div style={{float: "left", border: "1px", width: "15%"}}>
+                        <Button onClick={() => {
+                            const newTask = {
+                                todo: this.inputMessge.todo,
+                                priority: this.inputMessge.priority,
+                                status: this.inputMessge.status,
+                                expired_at: this.inputMessge.expired_at
+                            };
+                            this.props.onClickAdd(newTask)
+                        }} type="primary" style={{marginBottom: 16}}>
+                            Add a row
+                        </Button>
+                    </div>
+                    <div style={{float: "left", border: "1px", width: "80%"}}>
+                        <InputGroup compact>
+                            <Input style={{width: '50%'}} onChange={onChangeMsg} onPressEnter={() => {
+                                message.info(this.inputMessge.todo)
+                            }} placeholder="add something ~(≧▽≦)/~"/>
+                            <DatePicker
+                                showTime
+                                format="YYYY-MM-DD HH:mm:ss"
+                                onChange={date => {
+                                    if (date != null) this.inputMessge.expired_at = date.format('YYYY-MM-DD HH:mm:ss');
+                                    console.log(this.inputMessge.expired_at);
+                                }} placeholder={"Schedule"}/>
+                            <Dropdown.Button onClick={(e) => {
+                                this.inputMessge.priority = ''
+                            }} overlay={ratePriority}>
+                                priority &nbsp; {this.inputMessge.priority}
+                            </Dropdown.Button>
+                        </InputGroup>
+                    </div>
+                </div>
+                <br></br>
+                <Table pagination={{pageSize: 8}}
+                       components={components}
+                       rowClassName={() => 'editable-row'}
+                       bordered
+                       dataSource={this.props.todoList}
+                       columns={columns}
                 />
             </div>
         );

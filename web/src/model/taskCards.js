@@ -1,4 +1,6 @@
 import {request, post, update} from '../util/request';
+import {DELETE, UPDATE, DONE} from "../util/constant";
+import {message} from 'antd';
 
 const delay = (millisecond) => {
     return new Promise((resolve => {
@@ -26,9 +28,21 @@ export default {
         },
         * putTask({payload}, sagaEffects) {
             const {call, put} = sagaEffects;
-            const endPointURI = 'http://localhost:8080/api/undos/' + payload.id;
-            const response = yield call(update, endPointURI, payload);
-            yield put({type: 'updateTask', payload: response})
+            const endPointURI = 'http://localhost:8080/api/undos/' + payload.task.id;
+            const response = yield call(update, endPointURI, payload.task);
+            switch (payload.operate) {
+                case DONE:
+                    yield put({type: 'hideTask', payload: response});
+                    break;
+                case DELETE:
+                    yield put({type: 'hideTask', payload: response});
+                    break;
+                case UPDATE:
+                    yield put({type: 'updateTask', payload: response});
+                    break;
+                default:
+                    message.error("bad operate.")
+            }
         }
     },
     reducers: {
@@ -44,7 +58,7 @@ export default {
                 data: nextData,
             };
         },
-        deleteTask(state, {payload: newTask}) {
+        hideTask(state, {payload: newTask}) {
             const newData = [...state.data];
             const index = newData.findIndex(item => item.id === newTask.id);
             newData.splice(index, 1);
